@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import type { QuizResult } from "@/lib/quiz";
 import type { AdviceResponse, StudentProfile } from "@/lib/types";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { ProfileForm } from "@/components/ProfileForm";
+import { Quiz } from "@/components/Quiz";
 import { ResultsView } from "@/components/ResultsView";
 
-type View = "form" | "loading" | "results" | "error";
+type View = "form" | "quiz" | "loading" | "results" | "error";
 
 const introCopy = (
   <p className="mb-8 text-base leading-[26px] text-body">
@@ -16,11 +18,14 @@ const introCopy = (
   </p>
 );
 
-async function fetchAdvice(profile: StudentProfile): Promise<AdviceResponse> {
+async function fetchAdvice(
+  profile: StudentProfile,
+  quiz?: QuizResult,
+): Promise<AdviceResponse> {
   const response = await fetch("/api/advise", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(profile),
+    body: JSON.stringify(quiz ? { profile, quiz } : profile),
   });
 
   const data = await response.json();
@@ -39,14 +44,16 @@ async function fetchAdvice(profile: StudentProfile): Promise<AdviceResponse> {
 export function AdviseFlow() {
   const [view, setView] = useState<View>("form");
   const [lastProfile, setLastProfile] = useState<StudentProfile | undefined>();
+  const [lastQuiz, setLastQuiz] = useState<QuizResult | undefined>();
   const [advice, setAdvice] = useState<AdviceResponse | null>(null);
 
-  async function submitProfile(profile: StudentProfile) {
+  async function submitAdvice(profile: StudentProfile, quiz?: QuizResult) {
     setLastProfile(profile);
+    setLastQuiz(quiz);
     setView("loading");
 
     try {
-      const result = await fetchAdvice(profile);
+      const result = await fetchAdvice(profile, quiz);
       setAdvice(result);
       setView("results");
     } catch {
@@ -54,13 +61,32 @@ export function AdviseFlow() {
     }
   }
 
+  function handleProfileSubmit(profile: StudentProfile) {
+    if (profile.decided) {
+      void submitAdvice(profile);
+      return;
+    }
+
+    setLastProfile(profile);
+    setView("quiz");
+  }
+
+  function handleQuizComplete(quiz: QuizResult) {
+    if (!lastProfile) {
+      return;
+    }
+
+    void submitAdvice(lastProfile, quiz);
+  }
+
   function handleRetry() {
     if (lastProfile) {
-      void submitProfile(lastProfile);
+      void submitAdvice(lastProfile, lastQuiz);
     }
   }
 
   function handleStartOver() {
+    setLastQuiz(undefined);
     setView("form");
   }
 
@@ -86,12 +112,21 @@ export function AdviseFlow() {
     return <ResultsView advice={advice} onStartOver={handleStartOver} />;
   }
 
+  if (view === "quiz") {
+    return (
+      <>
+        {introCopy}
+        <Quiz onComplete={handleQuizComplete} />
+      </>
+    );
+  }
+
   return (
     <>
       {introCopy}
       <ProfileForm
         initialProfile={lastProfile}
-        onSubmit={(profile) => void submitProfile(profile)}
+        onSubmit={handleProfileSubmit}
       />
     </>
   );

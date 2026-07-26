@@ -26,7 +26,10 @@ function IconChip({
 }
 
 export function ResultsView({ advice, onStartOver }: ResultsViewProps) {
-  const { direction, colleges, checklist } = advice;
+  const { direction, colleges, checklist, meta } = advice;
+  const fromQuiz = meta.fromQuiz === true;
+  const counsellingWhy = meta.counsellingWhy;
+  const alternateDirections = meta.alternateDirections ?? [];
 
   return (
     <div className="space-y-6">
@@ -42,9 +45,25 @@ export function ResultsView({ advice, onStartOver }: ResultsViewProps) {
         <h3 className="font-head text-lg font-semibold text-ink">
           {direction.title}
         </h3>
-        <p className="mt-2 break-words text-base leading-[26px] text-body">
-          {direction.why}
-        </p>
+        {fromQuiz && counsellingWhy ? (
+          <>
+            <p className="mt-3 text-sm font-medium text-primary-600">
+              Based on what you told us
+            </p>
+            <p className="mt-1 break-words text-base leading-[26px] text-body">
+              {counsellingWhy}
+            </p>
+          </>
+        ) : (
+          <p className="mt-2 break-words text-base leading-[26px] text-body">
+            {direction.why}
+          </p>
+        )}
+        {fromQuiz && alternateDirections.length > 0 ? (
+          <p className="mt-3 text-sm text-muted">
+            Also worth considering: {alternateDirections.join(", ")}
+          </p>
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           {direction.skills.map((skill) => (
             <span

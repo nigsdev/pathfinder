@@ -41,5 +41,11 @@ export type AdviceResponse = {
   direction: { title: string; why: string; skills: string[] };
   colleges: RecommendedCollege[];
   checklist: { task: string; detail: string; deadline: string }[];
-  meta: { dataSource: "seeded" | "live"; usedFallback: boolean };
+  meta: {
+    dataSource: "seeded" | "live";
+    usedFallback: boolean;
+    fromQuiz?: boolean;
+    counsellingWhy?: string;
+    alternateDirections?: string[];
+  };
 };
