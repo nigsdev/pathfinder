@@ -1,5 +1,7 @@
 import { STREAMS, type Stream, type StudentProfile } from "@/lib/types";
 
+const MAX_INTERESTS_LENGTH = 2000;
+
 export function validateProfile(body: unknown): {
   profile: StudentProfile | null;
   error: string | null;
@@ -44,7 +46,9 @@ export function validateProfile(body: unknown): {
       ? { career: data.career.trim() }
       : {}),
     ...(typeof data.interests === "string" && data.interests.trim()
-      ? { interests: data.interests.trim() }
+      ? {
+          interests: data.interests.trim().slice(0, MAX_INTERESTS_LENGTH),
+        }
       : {}),
   };
 

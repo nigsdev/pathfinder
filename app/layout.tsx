@@ -37,8 +37,8 @@ export default function RootLayout({
       lang="en"
       className={`${jakarta.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-canvas font-body text-body">
-        <div className="mx-auto min-h-full w-full max-w-[640px] px-4">
+      <body className="min-h-full overflow-x-hidden bg-canvas font-body text-body">
+        <div className="mx-auto min-h-full w-full max-w-[640px] min-w-0 px-4">
           <Header />
           {children}
         </div>

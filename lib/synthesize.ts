@@ -44,8 +44,17 @@ function buildFallback(
   profile: StudentProfile,
   colleges: College[],
 ): ParsedSynthesis {
+  const direction =
+    colleges.length === 0
+      ? {
+          title: "Explore your options",
+          why: "We couldn't find colleges matching your search right now. The steps below still help you research programmes in your stream and city.",
+          skills: SYNTHESIS_FALLBACK.direction.skills,
+        }
+      : SYNTHESIS_FALLBACK.direction;
+
   return {
-    direction: SYNTHESIS_FALLBACK.direction,
+    direction,
     checklist: SYNTHESIS_FALLBACK.checklist,
     colleges: collegesToRecommended(profile, colleges),
   };
@@ -138,6 +147,10 @@ export async function synthesize(
   direction?: SynthesisDirection | null,
 ): Promise<SynthesizeResult> {
   const fallback = buildFallback(profile, colleges);
+
+  if (colleges.length === 0) {
+    return { ...fallback, usedFallback: true };
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     console.error("[synthesize] OPENAI_API_KEY is not set");

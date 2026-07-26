@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { QuizResult } from "@/lib/quiz";
 import type { AdviceResponse, StudentProfile } from "@/lib/types";
 import { ErrorState } from "@/components/ErrorState";
@@ -46,8 +46,16 @@ export function AdviseFlow() {
   const [lastProfile, setLastProfile] = useState<StudentProfile | undefined>();
   const [lastQuiz, setLastQuiz] = useState<QuizResult | undefined>();
   const [advice, setAdvice] = useState<AdviceResponse | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
 
   async function submitAdvice(profile: StudentProfile, quiz?: QuizResult) {
+    if (submitInFlightRef.current) {
+      return;
+    }
+
+    submitInFlightRef.current = true;
+    setIsSubmitting(true);
     setLastProfile(profile);
     setLastQuiz(quiz);
     setView("loading");
@@ -58,10 +66,17 @@ export function AdviseFlow() {
       setView("results");
     } catch {
       setView("error");
+    } finally {
+      submitInFlightRef.current = false;
+      setIsSubmitting(false);
     }
   }
 
   function handleProfileSubmit(profile: StudentProfile) {
+    if (isSubmitting) {
+      return;
+    }
+
     if (profile.decided) {
       void submitAdvice(profile);
       return;
@@ -72,15 +87,19 @@ export function AdviseFlow() {
   }
 
   function handleQuizComplete(quiz: QuizResult) {
-    if (!lastProfile) {
+    if (!lastProfile || isSubmitting) {
       return;
     }
 
     void submitAdvice(lastProfile, quiz);
   }
 
+  function handleQuizExit() {
+    setView("form");
+  }
+
   function handleRetry() {
-    if (lastProfile) {
+    if (lastProfile && !isSubmitting) {
       void submitAdvice(lastProfile, lastQuiz);
     }
   }
@@ -116,7 +135,11 @@ export function AdviseFlow() {
     return (
       <>
         {introCopy}
-        <Quiz onComplete={handleQuizComplete} />
+        <Quiz
+          onComplete={handleQuizComplete}
+          onExit={handleQuizExit}
+          disabled={isSubmitting}
+        />
       </>
     );
   }
@@ -127,6 +150,7 @@ export function AdviseFlow() {
       <ProfileForm
         initialProfile={lastProfile}
         onSubmit={handleProfileSubmit}
+        isSubmitting={isSubmitting}
       />
     </>
   );

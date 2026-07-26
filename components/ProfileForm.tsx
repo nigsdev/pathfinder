@@ -255,10 +255,11 @@ export function ProfileForm({
         <textarea
           id="interests"
           rows={3}
+          maxLength={2000}
           value={interests}
           onChange={(event) => setInterests(event.target.value)}
           placeholder="e.g. computers, design, biology, business"
-          className={inputClassName}
+          className={`${inputClassName} resize-y`}
         />
       </div>
 

@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         .map((college) => normalizeCollegeName(college.name)),
     );
 
-    const colleges = synthesis.colleges!.map((college) => ({
+    const colleges = (synthesis.colleges ?? []).map((college) => ({
       ...college,
       source: liveNames.has(normalizeCollegeName(college.name))
         ? ("live" as const)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import {
   QUIZ_QUESTIONS,
@@ -10,29 +10,58 @@ import {
 
 type QuizProps = {
   onComplete: (quiz: QuizResult) => void;
+  onExit: () => void;
+  disabled?: boolean;
 };
 
 const optionClassName =
-  "flex min-h-14 w-full items-center rounded-sm border border-border-strong bg-surface px-4 py-3 text-left text-base text-body transition-colors";
+  "flex min-h-14 w-full min-w-0 items-center rounded-sm border border-border-strong bg-surface px-4 py-3 text-left text-base break-words text-body transition-colors disabled:opacity-60";
 
 const optionSelectedClassName =
-  "flex min-h-14 w-full items-center rounded-sm border border-primary-600 bg-primary-050 px-4 py-3 text-left text-base font-medium text-ink transition-colors";
+  "flex min-h-14 w-full min-w-0 items-center rounded-sm border border-primary-600 bg-primary-050 px-4 py-3 text-left text-base break-words font-medium text-ink transition-colors disabled:opacity-60";
 
-export function Quiz({ onComplete }: QuizProps) {
+export function Quiz({ onComplete, onExit, disabled = false }: QuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [locked, setLocked] = useState(false);
 
   const question = QUIZ_QUESTIONS[currentIndex];
   const total = QUIZ_QUESTIONS.length;
   const progress = ((currentIndex + 1) / total) * 100;
   const selectedIndex = answers[question.id];
 
+  useEffect(() => {
+    window.history.pushState({ quizStep: currentIndex }, "");
+  }, [currentIndex]);
+
+  useEffect(() => {
+    function handlePopState() {
+      setLocked(false);
+
+      if (currentIndex > 0) {
+        setCurrentIndex((index) => index - 1);
+        return;
+      }
+
+      onExit();
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentIndex, onExit]);
+
   function handleSelect(optionIndex: number) {
+    if (locked || disabled) {
+      return;
+    }
+
+    setLocked(true);
     const nextAnswers = { ...answers, [question.id]: optionIndex };
     setAnswers(nextAnswers);
 
     if (currentIndex < total - 1) {
       setCurrentIndex((index) => index + 1);
+      setLocked(false);
       return;
     }
 
@@ -41,12 +70,12 @@ export function Quiz({ onComplete }: QuizProps) {
 
   function handleBack() {
     if (currentIndex > 0) {
-      setCurrentIndex((index) => index - 1);
+      window.history.back();
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div>
         <div
           className="h-1 w-full overflow-hidden rounded-pill bg-primary-100"
@@ -76,14 +105,17 @@ export function Quiz({ onComplete }: QuizProps) {
         </p>
       </div>
 
-      <div>
-        <p className="mb-4 text-base font-medium text-ink">{question.question}</p>
+      <div className="min-w-0">
+        <p className="mb-4 break-words text-base font-medium text-ink">
+          {question.question}
+        </p>
         <div className="flex flex-col gap-2">
           {question.options.map((option, index) => (
             <button
               key={option.label}
               type="button"
               onClick={() => handleSelect(index)}
+              disabled={locked || disabled}
               className={
                 selectedIndex === index ? optionSelectedClassName : optionClassName
               }
@@ -99,7 +131,8 @@ export function Quiz({ onComplete }: QuizProps) {
         <button
           type="button"
           onClick={handleBack}
-          className="inline-flex min-h-11 items-center gap-1 text-base font-medium text-muted hover:text-ink"
+          disabled={disabled}
+          className="inline-flex min-h-11 items-center gap-1 text-base font-medium text-muted hover:text-ink disabled:opacity-60"
         >
           <ChevronLeft size={18} strokeWidth={1.5} aria-hidden="true" />
           Back
