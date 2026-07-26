@@ -1,4 +1,5 @@
-import { getSeededAdvice } from "@/lib/seed-advice";
+import { buildSeededAdvice } from "@/lib/seed-advice";
+import { getColleges } from "@/lib/retrieve";
 import { validateProfile } from "@/lib/validate-profile";
 
 export async function POST(request: Request) {
@@ -10,9 +11,8 @@ export async function POST(request: Request) {
       return Response.json({ error: error ?? "Invalid profile." }, { status: 400 });
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const advice = getSeededAdvice(profile.city);
+    const colleges = await getColleges(profile);
+    const advice = buildSeededAdvice(profile, colleges);
 
     return Response.json(advice);
   } catch {
