@@ -3,6 +3,10 @@ import { synthesize } from "@/lib/synthesize";
 import type { AdviceResponse } from "@/lib/types";
 import { validateProfile } from "@/lib/validate-profile";
 
+function normalizeCollegeName(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -12,21 +16,35 @@ export async function POST(request: Request) {
       return Response.json({ error: error ?? "Invalid profile." }, { status: 400 });
     }
 
-    const colleges = await getColleges(profile);
     const direction =
       profile.decided && profile.career
         ? { title: profile.career }
         : undefined;
 
-    const synthesis = await synthesize(profile, colleges, direction);
+    const retrieval = await getColleges(
+      profile,
+      direction?.title,
+    );
+    const synthesis = await synthesize(profile, retrieval.colleges, direction);
+
+    const liveNames = new Set(
+      retrieval.liveCollegeNames.map((name) => normalizeCollegeName(name)),
+    );
+
+    const colleges = synthesis.colleges!.map((college) => ({
+      ...college,
+      source: liveNames.has(normalizeCollegeName(college.name))
+        ? ("live" as const)
+        : ("seeded" as const),
+    }));
 
     const advice: AdviceResponse = {
       direction: synthesis.direction!,
-      colleges: synthesis.colleges!,
+      colleges,
       checklist: synthesis.checklist!,
       meta: {
-        dataSource: "seeded",
-        usedFallback: synthesis.usedFallback,
+        dataSource: retrieval.dataSource,
+        usedFallback: retrieval.usedFallback || synthesis.usedFallback,
       },
     };
 

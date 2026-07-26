@@ -76,6 +76,11 @@ export function ResultsView({ advice, onStartOver }: ResultsViewProps) {
               <p className="mt-2 break-words text-base leading-[26px] text-body">
                 {college.why}
               </p>
+              <p className="mt-1 text-xs text-faint">
+                {college.source === "live"
+                  ? "Sourced live"
+                  : "From our directory"}
+              </p>
             </li>
           ))}
         </ul>

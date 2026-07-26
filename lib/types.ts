@@ -30,6 +30,7 @@ export type RecommendedCollege = Pick<College, "name" | "location"> & {
   course: string;
   fees: string;
   why: string;
+  source?: "live" | "seeded";
 };
 
 export type AdviceResponse = {
