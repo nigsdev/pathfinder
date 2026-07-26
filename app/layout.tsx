@@ -16,14 +16,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PathFinder",
+  title: "PathFinder — Honest college and career guidance",
   description:
-    "College discovery and career guidance for Class 12 students and their parents.",
+    "Honest college and career guidance for Class 12 students and their parents — clear directions, a shortlist that fits you, and practical next steps.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#3B5BDB",
 };
 
 export default function RootLayout({

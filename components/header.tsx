@@ -1,10 +1,12 @@
+import Link from "next/link";
+import { Wordmark } from "@/components/Wordmark";
+
 export function Header() {
   return (
     <header className="py-5">
-      <span className="font-head text-xl font-bold">
-        <span className="text-ink">Path</span>
-        <span className="text-primary-600">Finder</span>
-      </span>
+      <Link href="/" className="inline-block">
+        <Wordmark className="h-7 w-auto sm:h-8" />
+      </Link>
     </header>
   );
 }
