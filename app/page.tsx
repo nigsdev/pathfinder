@@ -1,3 +1,5 @@
+import { ProfileForm } from "@/components/ProfileForm";
+
 export default function Home() {
   return (
     <main className="py-8">
@@ -5,9 +7,16 @@ export default function Home() {
         Find your path after Class 12
       </h1>
       <p className="mt-4 text-base leading-[26px] text-body">
-        Honest college and career guidance for students and parents — clear
-        directions, a shortlist that fits you, and practical next steps.
+        Tell us a bit about you — we&apos;ll suggest directions, colleges, and
+        next steps that fit.
       </p>
+
+      <section className="mt-8" aria-labelledby="profile-heading">
+        <h2 id="profile-heading" className="sr-only">
+          Your profile
+        </h2>
+        <ProfileForm />
+      </section>
     </main>
   );
 }
