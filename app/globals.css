@@ -1,26 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* primary */
+  --primary-700:#2540A8; --primary-600:#3B5BDB; --primary-300:#9FB0F0;
+  --primary-100:#E5EAFC; --primary-050:#F2F5FE;
+  /* accent */
+  --accent-600:#D97706; --accent-500:#F59E0B; --accent-100:#FEF3C7;
+  /* verify */
+  --verify-600:#0E9F6E; --verify-100:#D6F3E7;
+  /* neutrals */
+  --ink:#1B2130; --body:#3A4150; --muted:#6B7280; --faint:#9AA1AE;
+  --border:#E4E7EC; --border-strong:#CDD2DC;
+  --surface:#FFFFFF; --surface-alt:#F1F3F7; --canvas:#F7F8FA;
+  /* semantic */
+  --success:#12B76A; --warning:#F79009; --error:#F04438; --info:#3B5BDB;
+  /* type */
+  --font-head:'Plus Jakarta Sans',sans-serif;
+  --font-body:'Inter',sans-serif;
+  /* radius */
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  /* elevation */
+  --shadow-sm:0 1px 2px rgba(16,24,40,.06);
+  --shadow-md:0 4px 12px rgba(16,24,40,.08);
+  --shadow-lg:0 12px 28px rgba(16,24,40,.10);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* primary */
+  --color-primary-700: var(--primary-700);
+  --color-primary-600: var(--primary-600);
+  --color-primary-300: var(--primary-300);
+  --color-primary-100: var(--primary-100);
+  --color-primary-050: var(--primary-050);
+  /* accent */
+  --color-accent-600: var(--accent-600);
+  --color-accent-500: var(--accent-500);
+  --color-accent-100: var(--accent-100);
+  /* verify */
+  --color-verify-600: var(--verify-600);
+  --color-verify-100: var(--verify-100);
+  /* neutrals */
+  --color-ink: var(--ink);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-canvas: var(--canvas);
+  /* semantic */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  /* type */
+  --font-head: var(--font-jakarta), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+  /* radius */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-pill: var(--r-pill);
+  /* elevation */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--body);
+  font-family: var(--font-inter), var(--font-body);
 }
