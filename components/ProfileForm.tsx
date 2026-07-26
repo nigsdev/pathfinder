@@ -55,13 +55,38 @@ function validateForm(
   return errors;
 }
 
-export function ProfileForm() {
-  const [marks, setMarks] = useState("");
-  const [stream, setStream] = useState<Stream | null>(null);
-  const [city, setCity] = useState("");
-  const [decided, setDecided] = useState<boolean | null>(null);
-  const [career, setCareer] = useState("");
-  const [interests, setInterests] = useState("");
+type ProfileFormProps = {
+  initialProfile?: StudentProfile;
+  onSubmit: (profile: StudentProfile) => void;
+  isSubmitting?: boolean;
+};
+
+function profileToFormState(profile: StudentProfile) {
+  return {
+    marks: String(profile.marks),
+    stream: profile.stream,
+    city: profile.city,
+    decided: profile.decided,
+    career: profile.career ?? "",
+    interests: profile.interests ?? "",
+  };
+}
+
+export function ProfileForm({
+  initialProfile,
+  onSubmit,
+  isSubmitting = false,
+}: ProfileFormProps) {
+  const initial = initialProfile ? profileToFormState(initialProfile) : null;
+
+  const [marks, setMarks] = useState(initial?.marks ?? "");
+  const [stream, setStream] = useState<Stream | null>(initial?.stream ?? null);
+  const [city, setCity] = useState(initial?.city ?? "");
+  const [decided, setDecided] = useState<boolean | null>(
+    initial ? initial.decided : null,
+  );
+  const [career, setCareer] = useState(initial?.career ?? "");
+  const [interests, setInterests] = useState(initial?.interests ?? "");
   const [errors, setErrors] = useState<FormErrors>({});
 
   function handleDecidedChange(value: boolean) {
@@ -91,7 +116,7 @@ export function ProfileForm() {
       ...(interests.trim() ? { interests: interests.trim() } : {}),
     };
 
-    console.log(profile);
+    onSubmit(profile);
   }
 
   return (
@@ -239,9 +264,10 @@ export function ProfileForm() {
 
       <button
         type="submit"
-        className="w-full min-h-11 rounded-sm bg-primary-600 px-5 py-3 text-base font-semibold text-white hover:bg-primary-700"
+        disabled={isSubmitting}
+        className="w-full min-h-11 rounded-sm bg-primary-600 px-5 py-3 text-base font-semibold text-white hover:bg-primary-700 disabled:opacity-60"
       >
-        Continue
+        {isSubmitting ? "Continuing..." : "Continue"}
       </button>
     </form>
   );
