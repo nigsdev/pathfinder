@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "exa-js": "^2.16.0",
+    "firecrawl": "^4.30.1",
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "openai": "^6.49.0",

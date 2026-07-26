@@ -81,6 +81,11 @@ export function ResultsView({ advice, onStartOver }: ResultsViewProps) {
                   ? "Sourced live"
                   : "From our directory"}
               </p>
+              {college.enriched ? (
+                <p className="mt-1 text-xs text-verify-600">
+                  Verified from college site
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

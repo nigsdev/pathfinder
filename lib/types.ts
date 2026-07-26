@@ -24,6 +24,9 @@ export type College = {
   approxFees: string;
   admissionBasis: string;
   notes: string;
+  url?: string;
+  admissionTiming?: string;
+  enriched?: boolean;
 };
 
 export type RecommendedCollege = Pick<College, "name" | "location"> & {
@@ -31,6 +34,7 @@ export type RecommendedCollege = Pick<College, "name" | "location"> & {
   fees: string;
   why: string;
   source?: "live" | "seeded";
+  enriched?: boolean;
 };
 
 export type AdviceResponse = {

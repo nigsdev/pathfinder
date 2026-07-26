@@ -58,8 +58,53 @@ function isCollege(value: unknown): value is College {
     item.courses.every((course) => typeof course === "string") &&
     typeof item.approxFees === "string" &&
     typeof item.admissionBasis === "string" &&
-    typeof item.notes === "string"
+    typeof item.notes === "string" &&
+    (item.url === undefined || typeof item.url === "string")
   );
+}
+
+function normalizeForMatch(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function attachSourceUrls(
+  colleges: College[],
+  searchResults: Array<{ title: string | null; url: string }>,
+): College[] {
+  const usedUrls = new Set<string>();
+
+  return colleges.map((college) => {
+    if (college.url) {
+      usedUrls.add(college.url);
+      return college;
+    }
+
+    const collegeKey = normalizeForMatch(college.name);
+    let bestMatch: { url: string; score: number } | null = null;
+
+    for (const result of searchResults) {
+      if (!result.url || usedUrls.has(result.url)) {
+        continue;
+      }
+
+      const titleKey = normalizeForMatch(result.title ?? "");
+      const score =
+        titleKey.includes(collegeKey) || collegeKey.includes(titleKey)
+          ? Math.min(collegeKey.length, titleKey.length)
+          : 0;
+
+      if (score > 0 && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { url: result.url, score };
+      }
+    }
+
+    if (bestMatch) {
+      usedUrls.add(bestMatch.url);
+      return { ...college, url: bestMatch.url };
+    }
+
+    return college;
+  });
 }
 
 function parseExtractedColleges(content: string): College[] {
@@ -136,7 +181,12 @@ async function extractCollegesFromResults(
       return [];
     }
 
-    return parseExtractedColleges(content);
+    const extracted = parseExtractedColleges(content);
+    const withUrls = attachSourceUrls(extracted, searchResults);
+    console.log(
+      `[exa] extracted ${withUrls.length} colleges, ${withUrls.filter((c) => c.url).length} with URL`,
+    );
+    return withUrls;
   } catch (error) {
     console.error("[exa] extraction failed", error);
     return [];

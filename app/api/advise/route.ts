@@ -1,3 +1,4 @@
+import { enrichColleges } from "@/lib/enrich";
 import { getColleges } from "@/lib/retrieve";
 import { synthesize } from "@/lib/synthesize";
 import type { AdviceResponse } from "@/lib/types";
@@ -5,6 +6,10 @@ import { validateProfile } from "@/lib/validate-profile";
 
 function normalizeCollegeName(name: string): string {
   return name.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function logStageDuration(stage: string, startedAt: number): void {
+  console.log(`[pipeline] ${stage} ${Math.round(performance.now() - startedAt)}ms`);
 }
 
 export async function POST(request: Request) {
@@ -21,14 +26,29 @@ export async function POST(request: Request) {
         ? { title: profile.career }
         : undefined;
 
+    const retrieveStartedAt = performance.now();
     const retrieval = await getColleges(
       profile,
       direction?.title,
     );
-    const synthesis = await synthesize(profile, retrieval.colleges, direction);
+    logStageDuration("retrieve", retrieveStartedAt);
+
+    const enrichStartedAt = performance.now();
+    const enrichedColleges = await enrichColleges(retrieval.colleges);
+    logStageDuration("enrich", enrichStartedAt);
+
+    const synthesizeStartedAt = performance.now();
+    const synthesis = await synthesize(profile, enrichedColleges, direction);
+    logStageDuration("synthesize", synthesizeStartedAt);
 
     const liveNames = new Set(
       retrieval.liveCollegeNames.map((name) => normalizeCollegeName(name)),
+    );
+
+    const enrichedNames = new Set(
+      enrichedColleges
+        .filter((college) => college.enriched)
+        .map((college) => normalizeCollegeName(college.name)),
     );
 
     const colleges = synthesis.colleges!.map((college) => ({
@@ -36,6 +56,7 @@ export async function POST(request: Request) {
       source: liveNames.has(normalizeCollegeName(college.name))
         ? ("live" as const)
         : ("seeded" as const),
+      enriched: enrichedNames.has(normalizeCollegeName(college.name)),
     }));
 
     const advice: AdviceResponse = {
