@@ -1,5 +1,6 @@
-import { buildSeededAdvice } from "@/lib/seed-advice";
 import { getColleges } from "@/lib/retrieve";
+import { synthesize } from "@/lib/synthesize";
+import type { AdviceResponse } from "@/lib/types";
 import { validateProfile } from "@/lib/validate-profile";
 
 export async function POST(request: Request) {
@@ -12,7 +13,22 @@ export async function POST(request: Request) {
     }
 
     const colleges = await getColleges(profile);
-    const advice = buildSeededAdvice(profile, colleges);
+    const direction =
+      profile.decided && profile.career
+        ? { title: profile.career }
+        : undefined;
+
+    const synthesis = await synthesize(profile, colleges, direction);
+
+    const advice: AdviceResponse = {
+      direction: synthesis.direction!,
+      colleges: synthesis.colleges!,
+      checklist: synthesis.checklist!,
+      meta: {
+        dataSource: "seeded",
+        usedFallback: synthesis.usedFallback,
+      },
+    };
 
     return Response.json(advice);
   } catch {
